@@ -263,6 +263,20 @@ function createExtensionAPI(
 			return runtime.getCommands();
 		},
 
+		getAvailableTools() {
+			const allToolNames = Object.keys(allTools);
+			const extensionsResult = resourceLoader.getExtensions();
+			const extensionToolNames = extensionsResult.extensions.flatMap((ext: any) =>
+				ext.tools?.map((t: any) => t.name) ?? [],
+			);
+			return [...allToolNames, ...extensionToolNames];
+		},
+
+		filterTools(toolNames: string[]) {
+			const allToolNames = this.getAvailableTools();
+			return toolNames.filter((name) => allToolNames.includes(name));
+		},
+
 		setModel(model) {
 			return runtime.setModel(model);
 		},

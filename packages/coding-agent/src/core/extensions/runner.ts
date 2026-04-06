@@ -255,12 +255,14 @@ export class ExtensionRunner {
 		this.runtime.setSessionName = actions.setSessionName;
 		this.runtime.getSessionName = actions.getSessionName;
 		this.runtime.setLabel = actions.setLabel;
-		this.runtime.getActiveTools = actions.getActiveTools;
-		this.runtime.getAllTools = actions.getAllTools;
-		this.runtime.setActiveTools = actions.setActiveTools;
-		this.runtime.refreshTools = actions.refreshTools;
-		this.runtime.getCommands = actions.getCommands;
-		this.runtime.setModel = actions.setModel;
+	this.runtime.getActiveTools = actions.getActiveTools;
+	this.runtime.getAllTools = actions.getAllTools;
+	this.runtime.setActiveTools = actions.setActiveTools;
+	this.runtime.refreshTools = actions.refreshTools;
+	this.runtime.getCommands = actions.getCommands;
+	this.runtime.getAvailableTools = actions.getAvailableTools;
+	this.runtime.filterTools = actions.filterTools;
+	this.runtime.setModel = actions.setModel;
 		this.runtime.getThinkingLevel = actions.getThinkingLevel;
 		this.runtime.setThinkingLevel = actions.setThinkingLevel;
 

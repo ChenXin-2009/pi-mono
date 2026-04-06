@@ -1034,6 +1034,12 @@ export interface ExtensionAPI {
 		tool: ToolDefinition<TParams, TDetails, TState>,
 	): void;
 
+	/** Get all available tool names (built-in + extensions). */
+	getAvailableTools(): string[];
+
+	/** Filter tools by name (useful for extensions to self-filter). */
+	filterTools(toolNames: string[]): string[];
+
 	// =========================================================================
 	// Command, Shortcut, Flag Registration
 	// =========================================================================
@@ -1325,6 +1331,10 @@ export type GetAllToolsHandler = () => ToolInfo[];
 
 export type GetCommandsHandler = () => SlashCommandInfo[];
 
+export type GetAvailableToolsHandler = () => string[];
+
+export type FilterToolsHandler = (toolNames: string[]) => string[];
+
 export type SetActiveToolsHandler = (toolNames: string[]) => void;
 
 export type RefreshToolsHandler = () => void;
@@ -1371,6 +1381,8 @@ export interface ExtensionActions {
 	setActiveTools: SetActiveToolsHandler;
 	refreshTools: RefreshToolsHandler;
 	getCommands: GetCommandsHandler;
+	getAvailableTools: GetAvailableToolsHandler;
+	filterTools: FilterToolsHandler;
 	setModel: SetModelHandler;
 	getThinkingLevel: GetThinkingLevelHandler;
 	setThinkingLevel: SetThinkingLevelHandler;

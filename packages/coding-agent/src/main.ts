@@ -38,7 +38,7 @@ import {
 import { SessionManager } from "./core/session-manager.js";
 import { SettingsManager } from "./core/settings-manager.js";
 import { printTimings, resetTimings, time } from "./core/timings.js";
-import { allTools } from "./core/tools/index.js";
+import { allTools, createAllToolDefinitions } from "./core/tools/index.js";
 import { runMigrations, showDeprecationWarnings } from "./migrations.js";
 import { InteractiveMode, runPrintMode, runRpcMode } from "./modes/index.js";
 import { ExtensionSelectorComponent } from "./modes/interactive/components/extension-selector.js";
@@ -289,6 +289,7 @@ function buildSessionOptions(
 	hasExistingSession: boolean,
 	modelRegistry: ModelRegistry,
 	settingsManager: SettingsManager,
+	resourceLoader: any,
 ): {
 	options: CreateAgentSessionOptions;
 	cliThinkingFromModel: boolean;
@@ -374,7 +375,38 @@ function buildSessionOptions(
 			options.tools = [];
 		}
 	} else if (parsed.tools) {
-		options.tools = parsed.tools.map((name) => allTools[name]);
+		// Get all tool names (built-in + extensions)
+		const allToolNames = Object.keys(allTools);
+		const extensionsResult = resourceLoader.getExtensions();
+		const extensionToolNames = extensionsResult.extensions.flatMap((ext: any) =>
+			ext.tools?.map((t: any) => t.name) ?? [],
+		);
+		const allToolNamesWithExtensions = [...allToolNames, ...extensionToolNames];
+
+		// Filter tools based on --tools flag
+		const validTools = parsed.tools.filter((name) => allToolNamesWithExtensions.includes(name));
+		if (validTools.length < parsed.tools.length) {
+			const invalidTools = parsed.tools.filter((name) => !allToolNamesWithExtensions.includes(name));
+			diagnostics.push({
+				type: "warning",
+				message: `Unknown tool(s): ${invalidTools.join(", ")}. Available tools: ${allToolNamesWithExtensions.join(", ")}`,
+			});
+		}
+
+		// Apply --exclude-tools if specified
+		if (parsed.excludeTools && parsed.excludeTools.length > 0) {
+			const excludeToolNames = parsed.excludeTools.filter((name) => allToolNamesWithExtensions.includes(name));
+			if (excludeToolNames.length < parsed.excludeTools.length) {
+				const invalidExcludeTools = parsed.excludeTools.filter((name) => !allToolNamesWithExtensions.includes(name));
+				diagnostics.push({
+					type: "warning",
+					message: `Unknown exclude tool(s): ${invalidExcludeTools.join(", ")}. Available tools: ${allToolNamesWithExtensions.join(", ")}`,
+				});
+			}
+			options.tools = validTools.filter((name) => !excludeToolNames.includes(name));
+		} else {
+			options.tools = validTools.map((name) => allTools[name]);
+		}
 	}
 
 	return { options, cliThinkingFromModel, diagnostics };
@@ -560,6 +592,7 @@ export async function main(args: string[]) {
 			sessionManager.buildSessionContext().messages.length > 0,
 			modelRegistry,
 			settingsManager,
+			resourceLoader,
 		);
 		diagnostics.push(...sessionOptionDiagnostics);
 

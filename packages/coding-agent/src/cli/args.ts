@@ -29,6 +29,7 @@ export interface Args {
 	models?: string[];
 	tools?: ToolName[];
 	noTools?: boolean;
+	excludeTools?: ToolName[];
 	extensions?: string[];
 	noExtensions?: boolean;
 	print?: boolean;
@@ -101,6 +102,9 @@ export function parseArgs(args: string[]): Args {
 			result.models = args[++i].split(",").map((s) => s.trim());
 		} else if (arg === "--no-tools") {
 			result.noTools = true;
+		} else if (arg === "--exclude-tools" && i + 1 < args.length) {
+			const excludeToolNames = args[++i].split(",").map((s) => s.trim());
+			result.excludeTools = excludeToolNames;
 		} else if (arg === "--tools" && i + 1 < args.length) {
 			const toolNames = args[++i].split(",").map((s) => s.trim());
 			const validTools: ToolName[] = [];
@@ -230,6 +234,7 @@ ${chalk.bold("Options:")}
   --no-tools                     Disable all built-in tools
   --tools <tools>                Comma-separated list of tools to enable (default: read,bash,edit,write)
                                  Available: read, bash, edit, write, grep, find, ls
+  --exclude-tools <tools>        Comma-separated list of tools to exclude (works with --tools)
   --thinking <level>             Set thinking level: off, minimal, low, medium, high, xhigh
   --extension, -e <path>         Load an extension file (can be used multiple times)
   --no-extensions, -ne           Disable extension discovery (explicit -e paths still work)
